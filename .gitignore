@@ -1,0 +1,19 @@
+# MacOS instance file
+.DS_Store
+# Python Cache
+__pycache__
+
+Video_Processing/detection/.ipynb_checkpoints
+Video_Processing/detection/object_detection
+Video_Processing/detection/slim
+Video_Processing/detection/test
+Video_Processing/detection/train
+Video_Processing/detection/faster_rcnn_inception_v2_coco_2018_01_28
+Video_Processing/detection/output
+
+Video_Processing/detection/VOCdevkit/VOC2012/Annotations
+Video_Processing/detection/VOCdevkit/VOC2012/JPEGImages
+
+Video_Processing/horses_1_predicted.mp4
+Video_Processing/horses_1.mp4
+Video_Processing/sample_elephant_1.mp4
