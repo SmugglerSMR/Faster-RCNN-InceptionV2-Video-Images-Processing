@@ -102,7 +102,7 @@ class ApplicationWindow(QMainWindow):
         print("Track!")
 
         # Do processing and call following method when completed #
-        #detection.detection_code(self.fileName)
+        detection.detection_code(self.fileName)
         self.processingFinished()
 
     def sliderReleased(self):

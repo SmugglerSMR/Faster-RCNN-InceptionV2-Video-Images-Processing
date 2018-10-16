@@ -135,7 +135,7 @@ def detection_code(video_inp):
             detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
             num_detections = detection_graph.get_tensor_by_name('num_detections:0')
             skip_frame = 1
-            skipt_each_n = 4
+            skipt_each_n = 6
             for i in tqdm(range(int(nb_frames/skipt_each_n)-1)):
                 ret, frame = video_reader.read()        
                 if skip_frame == skipt_each_n:

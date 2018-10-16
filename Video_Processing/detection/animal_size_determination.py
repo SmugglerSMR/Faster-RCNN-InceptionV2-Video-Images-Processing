@@ -34,28 +34,31 @@ def animal_get_size(lp, elephant, nb_frame, nb_count):
     # file.write("labels = []\n")
     GSD = (ws*alt)/(lf*rw) * 100#Ground sampling distance (cm/pixel)
     la = GSD * lp
+    file.write("%d,%d" % (nb_frame, nb_count))
 
-    if (elephant == 1):
-        label = "Elephant"
-        if (la > elephant_large):
-            elephant_size = "large"  
-        elif (la < elephant_large and la > elephant_small):
-            elephant_size = "medium"
+    for i in range(1, nb_count):
+        if (elephant == 1):
+            label = "Elephant"
+            if (la > elephant_large):
+                elephant_size = "large"  
+            elif (la < elephant_large and la > elephant_small):
+                elephant_size = "medium"
+            else:
+                elephant_size = "small"
+            # file.write("labels.append([%d,%d,[['%s', '%s']]])\n" % (nb_frame, 1, label, elephant_size))
+            file.write(",%s,%s" % (label, elephant_size))
+            # global_count = global_count+1
         else:
-            elephant_size = "small"
-        # file.write("labels.append([%d,%d,[['%s', '%s']]])\n" % (nb_frame, 1, label, elephant_size))
-        file.write("%d,%d,%s,%s\n" % (nb_frame, nb_count, label, elephant_size))
-        # global_count = global_count+1
-    else:
-        label = "Horse"
-        if (la > horse_large):
-            horse_size = "large"  
-        elif (la < horse_large and la > horse_small):
-            horse_size = "medium"
-        else:
-            horse_size = "small"    
-        file.write("%d,%d,%s,%s\n" % (nb_frame, nb_count, label, horse_size))
-        # global_count = global_count+1
+            label = "Horse"
+            if (la > horse_large):
+                horse_size = "large"  
+            elif (la < horse_large and la > horse_small):
+                horse_size = "medium"
+            else:
+                horse_size = "small"    
+            file.write(",%s,%s" % (label, horse_size))
+            # global_count = global_count+1
+    file.write("\n")
     file.close() 
     # print("\n\nlength animal:" , la)
     # print("elep:" , elephant_size)
