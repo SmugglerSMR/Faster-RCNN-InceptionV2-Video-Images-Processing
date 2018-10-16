@@ -2,8 +2,8 @@
 
 In order to run...
 
-(1) Download pyqt
-conda install pyqt
+(1) Download pyqt version 5.8
+pip install pyqt5==5.8
 
 (2) Run the application
 python application.py
