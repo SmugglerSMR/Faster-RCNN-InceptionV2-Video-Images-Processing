@@ -18,7 +18,7 @@ class ApplicationWindow(QMainWindow):
     QDir.setCurrent(QCoreApplication.applicationDirPath())
     processedVideoPath = QDir.currentPath() + "/ProcessedStuff/horses_1_predicted.mp4";
     textFilePath = QDir.currentPath() + "/ProcessedStuff/labels_example.txt";
-    
+
     # Environmental Variable
     # os.environ['PYTHONPATH'] = "$(pwd)/detection:$(pwd)/detection/slim"
     # subprocess.check_call(['sqsub', '-np', sys.argv[1], 'application.py'],
@@ -41,26 +41,26 @@ class ApplicationWindow(QMainWindow):
         self.ui.setupUi(self)
 
         ## CONNECT EVENTS (like button presses) to functions ##
-        self.ui.button_play_pause.clicked.connect(self.playPauseButtonClicked)
-        self.ui.button_load.clicked.connect(self.loadButtonClicked)
-        self.ui.button_track.clicked.connect(self.trackButtonClicked)
+        self.ui.playPauseButton.clicked.connect(self.playPauseButtonClicked)
+        self.ui.openButton.clicked.connect(self.openButtonClicked)
+        self.ui.detectButton.clicked.connect(self.detectButtonClicked)
 
         # Configure the original video widget
-        self.original_video_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-        self.original_video_player.durationChanged.connect(self.durationChanged)
-        self.original_video_player.setVideoOutput(self.ui.original_video_widget)
+        # self.original_video_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
+        # self.original_video_player.durationChanged.connect(self.durationChanged)
+        # self.original_video_player.setVideoOutput(self.ui.original_video_widget)
 
         # Configure the processed video widget
-        self.video_player = QMediaPlayer(None, QMediaPlayer.VideoSurface)
-        self.video_player.setNotifyInterval(30)
-        self.video_player.durationChanged.connect(self.durationChanged)
-        self.video_player.positionChanged.connect(self.positionChanged)
-        self.video_player.stateChanged.connect(self.stopped)
-        self.video_player.setVideoOutput(self.ui.video_widget)
+        self.videoPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface)
+        self.videoPlayer.setNotifyInterval(30)
+        self.videoPlayer.durationChanged.connect(self.durationChanged)
+        self.videoPlayer.positionChanged.connect(self.positionChanged)
+        self.videoPlayer.stateChanged.connect(self.stopped)
+        self.videoPlayer.setVideoOutput(self.ui.videoWidget)
 
         # Configure the video slider
-        self.ui.video_slider.sliderPressed.connect(self.sliderPressed)
-        self.ui.video_slider.sliderReleased.connect(self.sliderReleased)
+        self.ui.slider.sliderPressed.connect(self.sliderPressed)
+        self.ui.slider.sliderReleased.connect(self.sliderReleased)
 
         # Update states
         self.updateStates()
@@ -77,27 +77,27 @@ class ApplicationWindow(QMainWindow):
     def saveButtonClicked(self):
         print("Save!")
 
-    def loadButtonClicked(self):
+    def openButtonClicked(self):
         print("Load!")
         # fileName, _ = QFileDialog.getOpenFileName(
         #     self,
         #     "Choose a video",
         #     QStandardPaths.writableLocation(QStandardPaths.DocumentsLocation),
         #     "Vide files (*mp4 *mp3)")
-        # file = open("ProcessedStuff/labels_example.txt","w") 
+        # file = open("ProcessedStuff/labels_example.txt","w")
         # file.write("labels = []\n")
         # file.close()
         fileName, _ = QFileDialog.getOpenFileName(self, "Open Files")
 
         if fileName != "":
-            self.ui.file_info.setText(fileName)
+            self.ui.filepathLabel.setText(fileName)
             print("Video filepath: " + fileName)
             self.fileName = fileName
             self.fileReceived = True
             self.nextLine = 0
             self.updateStates()
 
-    def trackButtonClicked(self):
+    def detectButtonClicked(self):
         print("Track!")
 
         # Do processing and call following method when completed #
@@ -105,7 +105,7 @@ class ApplicationWindow(QMainWindow):
         self.processingFinished()
 
     def sliderReleased(self):
-        newPosition = self.ui.video_slider.value()
+        newPosition = self.ui.slider.value()
         self.setPosition(newPosition)
 
     def sliderPressed(self):
@@ -114,26 +114,26 @@ class ApplicationWindow(QMainWindow):
     def durationChanged(self):
         self.videoLoaded = True
         self.updateStates()
-        self.ui.video_slider.setMaximum(self.video_player.duration())
+        self.ui.slider.setMaximum(self.videoPlayer.duration())
 
     def positionChanged(self):
         if not self.playing:
             return
-        position = self.video_player.position()
+        position = self.videoPlayer.position()
         # Update video progress bar
-        self.ui.video_slider.setValue(position)
+        self.ui.slider.setValue(position)
         # Update information label
         self.updateLabel(position)
 
     def stopped(self):
-        if self.video_player.state() == QMediaPlayer.StoppedState:
+        if self.videoPlayer.state() == QMediaPlayer.StoppedState:
             self.playing = False
-            self.ui.label_info.setText("")
+            self.ui.infoLabel.setText("")
 
     ## Helper Functions ##
     def play(self):
-        self.original_video_player.play()
-        self.video_player.play()
+        # self.original_video_player.play()
+        self.videoPlayer.play()
         self.playing = True
 
     def pause(self):
@@ -144,14 +144,14 @@ class ApplicationWindow(QMainWindow):
     def setPosition(self, position):
         self.resetNextLine(position)
         self.updateLabel(position)
-        self.original_video_player.setPosition(position)
-        self.video_player.setPosition(position)
+        # self.original_video_player.setPosition(position)
+        self.videoPlayer.setPosition(position)
         self.play()
 
     def updateStates(self):
-        self.ui.button_play_pause.setEnabled(self.videoLoaded)
-        self.ui.video_slider.setEnabled(self.videoLoaded)
-        self.ui.button_track.setEnabled(self.fileReceived and not self.playing)
+        self.ui.playPauseButton.setEnabled(self.videoLoaded)
+        self.ui.slider.setEnabled(self.videoLoaded)
+        self.ui.detectButton.setEnabled(self.fileReceived and not self.playing)
 
     def processingFinished(self):
         print("Text file location: " + self.textFilePath)
@@ -159,8 +159,8 @@ class ApplicationWindow(QMainWindow):
         self.labels = [line.split(',') for line in file]
         file.close()
         print(self.processedVideoPath)
-        self.video_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.processedVideoPath)))
-        self.original_video_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.fileName)))
+        self.videoPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(self.processedVideoPath)))
+        # self.original_video_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.fileName)))
         self.play()
 
     # When the user changes the slider the next line changes
@@ -181,7 +181,7 @@ class ApplicationWindow(QMainWindow):
             messageStr = "Count: " + label[1]
             for i in range(2,len(label),2):
                 messageStr += ("\n%s. %s %s" % (i-int(i/2),label[i],label[i+1]))
-            self.ui.label_info.setText(messageStr)
+            self.ui.infoLabel.setText(messageStr)
             if self.nextLine < len(self.labels)-1:
                 self.nextLine += 1
 
