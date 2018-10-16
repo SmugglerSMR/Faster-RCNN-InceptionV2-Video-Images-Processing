@@ -18,6 +18,7 @@ import os, cv2
 from tqdm import tqdm
 import animal_size_determination
 import collections
+import moviepy.editor as mp
 
 # Path to frozen detection graph. This is the actual model that is used for the object detection.
 PATH_TO_CKPT = 'detection/output/frozen_inference_graph.pb'
@@ -83,12 +84,17 @@ label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
 category_index = label_map_util.create_category_index(categories)
 
+def resize_video(video_inp):
+    clip = mp.VideoFileClip(video_inp)
+    clip_resized = clip.resize(height=320, width=240) # make the height 360px ( According to moviePy documenation The width is then computed so that the width/height ratio is conserved.)
+    #clip.
+    clip_resized.write_videofile("ProcessedStuff/movie_resized.mp4")
 
 def detection_code(video_inp):
-    #video_inp = '../ProcessedStuff/cut.mp4'
-    video_out = 'ProcessedStuff/horses_1_predicted.mp4'
-
-    video_reader = cv2.VideoCapture(video_inp)
+    resize_video(video_inp)
+    video_out = 'ProcessedStuff/predicted.mp4'
+    video_original = 'ProcessedStuff/original.mp4'
+    video_reader = cv2.VideoCapture('ProcessedStuff/movie_resized.mp4')
     # Check if camera opened successfully
     if (video_reader.isOpened()== False): 
         print("Error opening video stream or file")
@@ -99,11 +105,24 @@ def detection_code(video_inp):
     nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))    
     frame_h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
     frame_w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
-
+    # frame_h = 320
+    # frame_w = 240
+    # Set sizis manually
+    #out_h = 600
+    #out_w = 717
+    print(frame_h)
+    print(frame_w)
     video_writer = cv2.VideoWriter(video_out,
-                                cv2.VideoWriter_fourcc(*'XVID'), 
-                                50.0, 
+                                cv2.VideoWriter_fourcc(*'mp4v'), 
+                                28.0, 
                                 (frame_w, frame_h))
+    
+    video_writer_original = cv2.VideoWriter(video_original,
+                                cv2.VideoWriter_fourcc(*'mp4v'), 
+                                28.0, 
+                                (frame_w, frame_h))
+
+
     with detection_graph.as_default():
         with tf.Session(graph=detection_graph) as sess:
             # Definite input and output Tensors for detection_graph
@@ -116,18 +135,30 @@ def detection_code(video_inp):
             detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
             num_detections = detection_graph.get_tensor_by_name('num_detections:0')
             skip_frame = 1
-            for i in tqdm(range(nb_frames)):
+            skipt_each_n = 4
+            for i in tqdm(range(int(nb_frames/skipt_each_n)-1)):
                 ret, frame = video_reader.read()        
-                if skip_frame == 2:
+                if skip_frame == skipt_each_n:
                     skip_frame = 1
-                    continue
+                    for i in range(1, skipt_each_n-1):
+                        ret, frame = video_reader.read()                                       
+                    #ret, frame = video_reader.read()                                       
                 skip_frame = skip_frame + 1
+                original_frame = frame
                 # the array based representation of the image will be used later in order to prepare the
                 # result image with boxes and labels on it.
                 image_np = load_image_into_numpy_array(frame, frame_h, frame_w)
+                image_np_original = load_image_into_numpy_array(original_frame, frame_h, frame_w)
                 # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
+                image_np = cv2.resize(image_np, (frame_w, frame_h), interpolation = cv2.INTER_AREA)
+                # original_image = image_np
+
                 image_np_expanded = np.expand_dims(image_np, axis=0)
                 # Actual detection.
+                # height, width = image_np_expanded.shape[:2]
+                
+                
+                # Run detection
                 (boxes, scores, classes, num) = sess.run(
                     [detection_boxes, detection_scores, detection_classes, num_detections],
                     feed_dict={image_tensor: image_np_expanded})
@@ -144,16 +175,8 @@ def detection_code(video_inp):
                     line_thickness=3)
                 
                 video_writer.write(np.uint8(image_np))
-                
-                # Detecting sizes
-                # classs = np.squeeze(classes).astype(np.int32)
-                # if classs[i] in category_index.keys():
-                #     class_name = category_index[classs[i]]['id']
-                
-                #     box = np.squeeze(boxes)
-                #     ymin, xmin, ymax, xmax = box[i]
-                #     #print(xmax-xmin)
-                #     animal_size_determination.animal_get_size((xmax-xmin)*1500, class_name, i)
+                video_writer_original.write(np.uint8(image_np_original))
+                # Detecting sizes                
                 # Getting information: Practicing
                 box_to_color_map = collections.defaultdict(str)
                 nb_count = 0
@@ -173,12 +196,14 @@ def detection_code(video_inp):
                         # Multiple with image height and width
                         class_name = category_index[classes[i]]['id']
                         width_px = xmax*frame_w-xmin*frame_w
-                        animal_size_determination.animal_get_size(width_px, class_name, nb_count)
+                        animal_size_determination.animal_get_size(width_px, class_name, nb_frames, nb_count)
             
             print('Video released')
-
+            print(int(video_writer.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+            print(int(video_writer.get(cv2.CAP_PROP_FRAME_WIDTH)))
             video_reader.release()
             video_writer.release()
+            video_writer_original.release()
 
 # # Provides a start point for out code
 # if __name__ == "__main__":

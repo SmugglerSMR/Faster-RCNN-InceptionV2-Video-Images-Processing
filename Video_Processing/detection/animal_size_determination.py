@@ -23,10 +23,8 @@ horse_small = 100
 
 # Set animal for detection, 0 = Horse, 1 = Elephant
 elephant = 0
-global global_count
-global_count = 1
 
-def animal_get_size(lp, elephant, nb_frame):
+def animal_get_size(lp, elephant, nb_frame, nb_count):
     # Strings to display on GUI
     elephant_size = ""
     horse_size = ""
@@ -46,7 +44,7 @@ def animal_get_size(lp, elephant, nb_frame):
         else:
             elephant_size = "small"
         # file.write("labels.append([%d,%d,[['%s', '%s']]])\n" % (nb_frame, 1, label, elephant_size))
-        file.write("%d,%d,%s,%s\n" % (nb_frame, 6, label, elephant_size))
+        file.write("%d,%d,%s,%s\n" % (nb_frame, nb_count, label, elephant_size))
         # global_count = global_count+1
     else:
         label = "Horse"
@@ -56,7 +54,7 @@ def animal_get_size(lp, elephant, nb_frame):
             horse_size = "medium"
         else:
             horse_size = "small"    
-        file.write("%d,%d,%s,%s\n" % (nb_frame, 6, label, horse_size))
+        file.write("%d,%d,%s,%s\n" % (nb_frame, nb_count, label, horse_size))
         # global_count = global_count+1
     file.close() 
     # print("\n\nlength animal:" , la)

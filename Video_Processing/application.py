@@ -16,7 +16,8 @@ import detection
 class ApplicationWindow(QMainWindow):
     ## Accessing files in Processed Stuff ##
     QDir.setCurrent(QCoreApplication.applicationDirPath())
-    processedVideoPath = QDir.currentPath() + "/ProcessedStuff/horses_1_predicted.mp4";
+    processedVideoPath = QDir.currentPath() + "/ProcessedStuff/predicted.mp4";
+    originalVideoPath = QDir.currentPath() + "/ProcessedStuff/original.mp4";
     textFilePath = QDir.currentPath() + "/ProcessedStuff/labels_example.txt";
     
     # Environmental Variable
@@ -101,7 +102,7 @@ class ApplicationWindow(QMainWindow):
         print("Track!")
 
         # Do processing and call following method when completed #
-        detection.detection_code(self.fileName)
+        #detection.detection_code(self.fileName)
         self.processingFinished()
 
     def sliderReleased(self):
@@ -160,7 +161,7 @@ class ApplicationWindow(QMainWindow):
         file.close()
         print(self.processedVideoPath)
         self.video_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.processedVideoPath)))
-        self.original_video_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.fileName)))
+        self.original_video_player.setMedia(QMediaContent(QUrl.fromLocalFile(self.originalVideoPath)))
         self.play()
 
     # When the user changes the slider the next line changes

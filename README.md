@@ -31,6 +31,7 @@ Next, run docker in order to acess it. It will run one time container.
 ```
 docker run -it -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v $(pwd)/Video_Processing:/app \
+    -v $(pwd)/ffmpeg-linux64-v3.3.1:/home/qtuser/.imageio/ffmpeg/ffmpeg-linux64-v3.3.1 \
     -e DISPLAY=$DISPLAY \
     --env-file ./env.list \
     -u qtuser \
