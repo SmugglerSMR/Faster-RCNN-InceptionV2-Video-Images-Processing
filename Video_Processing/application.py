@@ -3,14 +3,17 @@
 from PyQt5.QtMultimedia import QMediaContent, QMediaPlayer, QVideoProbe
 from PyQt5.QtCore import QDir, Qt, QUrl, QCoreApplication, QStandardPaths, QTime
 from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel,
-        QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QMainWindow)
+        QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QMainWindow, QProgressDialog, QMessageBox)
 from WildTrack import Ui_MainWindow
+import PyQt5.QtTest
 
 import os
 import sys
 import subprocess
+import time
 
 import detection
+import PyQtThreading
 
 # The class that handles the application itself
 class ApplicationWindow(QMainWindow):
@@ -24,9 +27,13 @@ class ApplicationWindow(QMainWindow):
     #                   env=dict(os.environ, SQSUB_VAR="visible in this subprocess"))
 
     ## Important variables ##
+    # 3 key states
+    fileUploaded = False
+    fileProcessed = False
+    processing = False
+
     videoLoaded = False
     fileReceived = False
-    processing = False
     playing = False
     fileName = None
     duration = 0
@@ -58,6 +65,9 @@ class ApplicationWindow(QMainWindow):
         # Detect button
         self.ui.detectButton.clicked.connect(self.detectButtonClicked)
 
+        # Help button
+        self.ui.helpButton.clicked.connect(self.helpButtonClicked)
+
         # Video player
         self.videoPlayer = QMediaPlayer(None, QMediaPlayer.VideoSurface) # QMediaPlayer object
         self.videoPlayer.durationChanged.connect(self.durationChanged)
@@ -83,14 +93,12 @@ class ApplicationWindow(QMainWindow):
             self.ui.playPauseButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
         else:
             print("Play!")
-            self.ui.slider.setValue(0)
-            self.updateLabel(0)
             self.play()
             self.ui.playPauseButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
 
     def stopButtonClicked(self):
-        self.ui.slider.setValue(0)
-        self.updateLabel(0)
+        # self.ui.slider.setValue(0)
+        # self.setPosition(0)
         self.stop()
 
     def saveButtonClicked(self):
@@ -109,22 +117,49 @@ class ApplicationWindow(QMainWindow):
             # file = open("ProcessedStuff/labels_example.txt","w")
             # file.write("labels = []\n")
             # file.close()
+            self.fileProcessed = False
+            self.fileUploaded = True
             self.ui.filepathLabel.setText(fileName)
             print("Video filepath: " + fileName)
             self.fileName = fileName
-            self.fileReceived = True
             self.nextLine = 0
             self.updateStates()
+
+    def helpButtonClicked(self):
+        print("Help!")
+        message = QMessageBox.about(self, 'Help',
+        "To begin processing your drone footage, simply press the Open button and select your target file, then press the Detect button.")
+
+    # Threading
+    def worker(self, inval):
+        # print("in worker, received '%s'" % inval)
+        detection.detection_code(self.fileName)
+        time.sleep(2)
+        return inval
+
+    def on_send_finished(self, result):
+        # print("got %s. Type is %s" % (result, type(result)))
+        self.processingFinished()
+        self.processing = False
+        self.fileProcessed = True
+        self.updateStates()
 
     def detectButtonClicked(self):
         print("Track!")
         self.processing = True
         self.updateStates()
+        # time.sleep(500)
+        # QApplication.processEvents()
 
-        # Do processing and call following method when completed #
-        detection.detection_code(self.fileName)
-        self.processingFinished()
-        self.updateStates()
+        # progress = QProgressDialog("Detection in progress...", "Close", 0, 100, self);
+
+        self.t1 = PyQtThreading.RunThread(self.worker, self.on_send_finished, "test")
+
+        # DETECTION
+        # detection.detection_code(self.fileName)
+        #
+        # self.processingFinished()
+        # self.updateStates()
 
     def sliderPressed(self):
         self.originalState = self.state
@@ -170,10 +205,10 @@ class ApplicationWindow(QMainWindow):
 
     def stop(self):
         self.playing = False
+        self.ui.slider.setValue(0)
+        self.setPosition(0)
         self.videoPlayer.stop()
         self.originalState = QMediaPlayer.StoppedState
-        self.setPosition(0)
-
         self.ui.playPauseButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
 
     def setPosition(self, position):
@@ -185,11 +220,12 @@ class ApplicationWindow(QMainWindow):
             self.play()
 
     def updateStates(self):
-        self.ui.playPauseButton.setEnabled(self.videoLoaded)
-        self.ui.stopButton.setEnabled(self.videoLoaded)
+        self.ui.playPauseButton.setEnabled(self.fileProcessed and not self.processing)
+        self.ui.stopButton.setEnabled(self.fileProcessed and not self.processing)
+        self.ui.slider.setEnabled(self.fileProcessed)
         # self.ui.saveButton.setEnabled(self.videoLoaded)
-        self.ui.slider.setEnabled(self.videoLoaded)
-        self.ui.detectButton.setEnabled(self.fileReceived and not self.processing)
+        self.ui.detectButton.setEnabled(self.fileUploaded and not self.processing)
+        self.ui.openButton.setEnabled(not self.processing)
 
     def processingFinished(self):
         print("Text file location: " + self.textFilePath)

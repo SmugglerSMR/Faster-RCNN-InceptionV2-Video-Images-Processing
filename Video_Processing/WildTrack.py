@@ -11,10 +11,11 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(836, 429)
+        MainWindow.resize(828, 421)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setContentsMargins(8, 8, 8, 8)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setContentsMargins(-1, 0, -1, -1)
@@ -33,6 +34,10 @@ class Ui_MainWindow(object):
         self.detectButton.setMinimumSize(QtCore.QSize(80, 0))
         self.detectButton.setObjectName("detectButton")
         self.horizontalLayout.addWidget(self.detectButton)
+        self.helpButton = QtWidgets.QPushButton(self.centralwidget)
+        self.helpButton.setMinimumSize(QtCore.QSize(80, 0))
+        self.helpButton.setObjectName("helpButton")
+        self.horizontalLayout.addWidget(self.helpButton)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.horizontalLayout_2 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_2.setContentsMargins(-1, 0, -1, -1)
@@ -96,6 +101,7 @@ class Ui_MainWindow(object):
 "<p style=\" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"><span style=\" font-style:italic;\">No file loaded...</span></p></body></html>"))
         self.openButton.setText(_translate("MainWindow", "Open"))
         self.detectButton.setText(_translate("MainWindow", "Detect"))
+        self.helpButton.setText(_translate("MainWindow", "Help"))
         self.durationLabel.setText(_translate("MainWindow", "00:00/00:00"))
 
 from PyQt5.QtMultimediaWidgets import QVideoWidget
