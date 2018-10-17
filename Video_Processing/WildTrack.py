@@ -84,6 +84,10 @@ class Ui_MainWindow(object):
         self.slider.setOrientation(QtCore.Qt.Horizontal)
         self.slider.setObjectName("slider")
         self.horizontalLayout_5.addWidget(self.slider)
+        self.restoreButton = QtWidgets.QPushButton(self.centralwidget)
+        self.restoreButton.setMinimumSize(QtCore.QSize(80, 0))
+        self.restoreButton.setObjectName("restoreButton")
+        self.horizontalLayout_5.addWidget(self.restoreButton)
         self.horizontalLayout_3.addLayout(self.horizontalLayout_5)
         self.verticalLayout.addLayout(self.horizontalLayout_3)
         MainWindow.setCentralWidget(self.centralwidget)
@@ -102,7 +106,8 @@ class Ui_MainWindow(object):
         self.openButton.setText(_translate("MainWindow", "Open"))
         self.detectButton.setText(_translate("MainWindow", "Detect"))
         self.helpButton.setText(_translate("MainWindow", "Help"))
-        self.durationLabel.setText(_translate("MainWindow", "00:00/00:00"))
+        self.durationLabel.setText(_translate("MainWindow", "00:00 / 00:00"))
+        self.restoreButton.setText(_translate("MainWindow", "Restore"))
 
 from PyQt5.QtMultimediaWidgets import QVideoWidget
 

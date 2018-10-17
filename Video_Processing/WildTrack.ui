@@ -195,7 +195,7 @@ p, li { white-space: pre-wrap; }
         <item>
          <widget class="QLabel" name="durationLabel">
           <property name="text">
-           <string>00:00/00:00</string>
+           <string>00:00 / 00:00</string>
           </property>
          </widget>
         </item>
@@ -203,6 +203,19 @@ p, li { white-space: pre-wrap; }
          <widget class="QSlider" name="slider">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="restoreButton">
+          <property name="minimumSize">
+           <size>
+            <width>80</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Restore</string>
           </property>
          </widget>
         </item>

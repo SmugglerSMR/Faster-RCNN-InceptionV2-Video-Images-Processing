@@ -32,13 +32,16 @@ class ApplicationWindow(QMainWindow):
     fileProcessed = False
     processing = False
 
-    videoLoaded = False
-    fileReceived = False
-    playing = False
+    #
+    # playing = False
+
+    # Attributes
     fileName = None
     duration = 0
     labels = []
     nextLine = 0
+
+    # Supports playback
     state = QMediaPlayer.StoppedState
     originalState = QMediaPlayer.StoppedState
 
@@ -65,6 +68,9 @@ class ApplicationWindow(QMainWindow):
         # Detect button
         self.ui.detectButton.clicked.connect(self.detectButtonClicked)
 
+        # Restore button
+        self.ui.restoreButton.clicked.connect(self.restoreButtonClicked)
+
         # Help button
         self.ui.helpButton.clicked.connect(self.helpButtonClicked)
 
@@ -87,18 +93,23 @@ class ApplicationWindow(QMainWindow):
 
     ##  CALLBACK METHODS ##
     def playPauseButtonClicked(self):
-        if self.playing:
+        if self.state == QMediaPlayer.PlayingState:
             print("Pause!")
             self.pause()
             self.ui.playPauseButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
-        else:
+        elif self.state == QMediaPlayer.PausedState:
             print("Play!")
             self.play()
             self.ui.playPauseButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
+        elif self.state == QMediaPlayer.StoppedState:
+            self.ui.slider.setValue(0)
+            self.setPosition(0)
+            self.state = QMediaPlayer.PausedState
+            self.playPauseButtonClicked()
 
     def stopButtonClicked(self):
-        # self.ui.slider.setValue(0)
-        # self.setPosition(0)
+        self.ui.slider.setValue(0)
+        self.setPosition(0)
         self.stop()
 
     def saveButtonClicked(self):
@@ -130,6 +141,15 @@ class ApplicationWindow(QMainWindow):
         message = QMessageBox.about(self, 'Help',
         "To begin processing your drone footage, simply press the Open button and select your target file, then press the Detect button.")
 
+    def restoreButtonClicked(self):
+        if (not(os.path.exists(self.processedVideoPath) and os.path.exists(self.textFilePath))):
+            message = QMessageBox.warning(self, 'Restore Failed',
+            "There is no previous session available.")
+            return
+        self.fileProcessed = True
+        self.processingFinished()
+        self.updateStates()
+
     # Threading
     def worker(self, inval):
         # print("in worker, received '%s'" % inval)
@@ -151,6 +171,7 @@ class ApplicationWindow(QMainWindow):
         # time.sleep(500)
         # QApplication.processEvents()
 
+        ## OPTIONAL TODO: PROGRESS BAR (I HAVE NOT BEEN ABLE TO FIGURE OUT HOW TO GET THIS TO WORK)
         # progress = QProgressDialog("Detection in progress...", "Close", 0, 100, self);
 
         self.t1 = PyQtThreading.RunThread(self.worker, self.on_send_finished, "test")
@@ -162,6 +183,7 @@ class ApplicationWindow(QMainWindow):
         # self.updateStates()
 
     def sliderPressed(self):
+        print("Slider pressed")
         self.originalState = self.state
         self.pause()
 
@@ -171,42 +193,51 @@ class ApplicationWindow(QMainWindow):
         self.updateLabel(newPosition)
         self.updateDurationInfo(newPosition)
         self.videoPlayer.setPosition(newPosition)
+        print("videoPlayer.setPosition" + str(newPosition))
 
     def sliderReleased(self):
         newPosition = self.ui.slider.value()
+        print(newPosition)
         self.setPosition(newPosition)
 
     def durationChanged(self, duration):
         self.duration = duration
+        print("Duration changed")
         self.ui.slider.setMaximum(duration)
+        self.updateDurationInfo(0)
 
     def positionChanged(self, position):
-        if not self.playing:
+        if not (self.state == QMediaPlayer.PlayingState):
             return
         # Update video progress bar
+        print("self.positionChanged" + str(position))
         self.ui.slider.setValue(position)
         # Update information label
         self.updateLabel(position)
         self.updateDurationInfo(position)
 
     def stateChanged(self, state):
+        print(state)
         self.state = state
         if state == QMediaPlayer.StoppedState:
             self.stop()
 
     ## Helper Functions ##
     def play(self):
-        self.playing = True
+        self.state = QMediaPlayer.PlayingState
+        # self.playing = True
         self.videoPlayer.play()
 
     def pause(self):
-        self.playing = False
+        self.state = QMediaPlayer.PausedState
+        # self.playing = False
         self.videoPlayer.pause()
 
     def stop(self):
-        self.playing = False
-        self.ui.slider.setValue(0)
-        self.setPosition(0)
+        self.state = QMediaPlayer.StoppedState
+        # self.playing = False
+        # self.ui.slider.setValue(0)
+        # self.setPosition(0)
         self.videoPlayer.stop()
         self.originalState = QMediaPlayer.StoppedState
         self.ui.playPauseButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
@@ -216,6 +247,7 @@ class ApplicationWindow(QMainWindow):
         self.updateLabel(position)
         self.updateDurationInfo(position)
         self.videoPlayer.setPosition(position)
+        print("self.setPosition" + str(position))
         if self.originalState == QMediaPlayer.PlayingState:
             self.play()
 
@@ -231,10 +263,14 @@ class ApplicationWindow(QMainWindow):
         print("Text file location: " + self.textFilePath)
         file = open(self.textFilePath, "r")
         self.labels = [line.split(',') for line in file]
+        if not self.labels:
+            message = QMessageBox.warning(self, 'No label information',
+            "Nothing was detected, please try again. Are you sure you have uploaded a video containing at least one horse or elephant?")
+            self.fileProcessed = False
+            return
         file.close()
         print(self.processedVideoPath)
         self.videoPlayer.setMedia(QMediaContent(QUrl.fromLocalFile(self.processedVideoPath)))
-        self.videoLoaded = True
         self.processing = False
 
     # When the user changes the slider the next line changes
@@ -260,8 +296,8 @@ class ApplicationWindow(QMainWindow):
                 self.nextLine += 1
 
     def updateDurationInfo(self, currentInfo):
-        duration = self.duration / 1000
-        currentInfo /= 1000
+        duration = round(self.duration / 1000)
+        currentInfo = round(currentInfo / 1000)
         if currentInfo or duration:
             currentTime = QTime((currentInfo/3600)%60, (currentInfo/60)%60,
                     currentInfo%60, (currentInfo*1000)%1000)
