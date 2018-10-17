@@ -1,10 +1,10 @@
 45,5,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
 45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
+45,5,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
 45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
 45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
-45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
-45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
-45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
-45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
-45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
-45,6,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
+45,5,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
+45,5,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
+45,5,Elephant,small,Elephant,small,Elephant,small,Elephant,small,Elephant,small
+45,4,Elephant,small,Elephant,small,Elephant,small,Elephant,small
+45,3,Elephant,small,Elephant,small,Elephant,small

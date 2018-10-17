@@ -70,8 +70,7 @@ def animal_get_size_array(lp, animals, nb_frame, nb_count, prev_count):
     label = ""
     # Finish Comparison!!!!!!!!!!!!!
     
-    if(prev_count<nb_count):
-        print(lp)
+    if(prev_count<nb_count):        
         file = open("ProcessedStuff/labels_example.txt","a") 
         
         file.write("%d,%d" % (nb_frame, nb_count))

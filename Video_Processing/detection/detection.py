@@ -160,8 +160,10 @@ def detection_code(video_inp):
 
                 
                 animal_size_determination.animal_get_size_array(widths, class_names, nb_frames, nb_count, prev_count)
-                if prev_count < nb_count:
-                    prev_count = nb_count
+                
+                # Copies last line to save time. Not saving
+                # if prev_count < nb_count:
+                #     prev_count = nb_count
                 nb_count = 0
 
             print('Video released')            
