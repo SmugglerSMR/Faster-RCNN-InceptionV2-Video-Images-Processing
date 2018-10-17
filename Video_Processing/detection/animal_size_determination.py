@@ -63,6 +63,52 @@ def animal_get_size(lp, elephant, nb_frame, nb_count):
     # print("\n\nlength animal:" , la)
     # print("elep:" , elephant_size)
     # print("horse:" , horse_size)
+GSD = (ws*alt)/(lf*rw) * 100#Ground sampling distance (cm/pixel)
+def animal_get_size_array(lp, animals, nb_frame, nb_count, prev_count):
+    # Strings to display on GUI
+    animal_size = ""
+    label = ""
+    # Finish Comparison!!!!!!!!!!!!!
+    
+    if(prev_count<nb_count):
+        print(lp)
+        file = open("ProcessedStuff/labels_example.txt","a") 
+        
+        file.write("%d,%d" % (nb_frame, nb_count))
 
+        for i in range(0, nb_count):        
+            print(i)
+            la = GSD * lp[i]
+            if (animals[i] == 1):
+                label = "Elephant"
+                if (la > elephant_large):
+                    animal_size = "large"  
+                elif (la < elephant_large and la > elephant_small):
+                    animal_size = "medium"
+                else:
+                    animal_size = "small"
+            else:
+                label = "Horse"
+                if (la > horse_large):
+                    animal_size = "large"  
+                elif (la < horse_large and la > horse_small):
+                    animal_size = "medium"
+                else:
+                    animal_size = "small"    
+            
+            file.write(",%s,%s" % (label, animal_size)) 
+        file.write("\n")
+        file.close() 
+    else:
+        fileHandle =  open("ProcessedStuff/labels_example.txt","r")
+        lineList = fileHandle.readlines()
+        fileHandle.close() 
+        fileHandle =  open("ProcessedStuff/labels_example.txt","a")
+        if len(lineList) == 0:
+            fileHandle.write(lineList[len(lineList)])
+        else:
+            fileHandle.write(lineList[len(lineList)-1])
 
+        #fileHandle.write("\n")
+        fileHandle.close()        
 

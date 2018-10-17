@@ -28,34 +28,6 @@ PATH_TO_LABELS = 'detection/label.pbtxt'
 
 NUM_CLASSES = 2
 
-# Colours for drawing
-STANDARD_COLORS = [
-    'AliceBlue', 'Chartreuse', 'Aqua', 'Aquamarine', 'Azure', 'Beige', 'Bisque',
-    'BlanchedAlmond', 'BlueViolet', 'BurlyWood', 'CadetBlue', 'AntiqueWhite',
-    'Chocolate', 'Coral', 'CornflowerBlue', 'Cornsilk', 'Crimson', 'Cyan',
-    'DarkCyan', 'DarkGoldenRod', 'DarkGrey', 'DarkKhaki', 'DarkOrange',
-    'DarkOrchid', 'DarkSalmon', 'DarkSeaGreen', 'DarkTurquoise', 'DarkViolet',
-    'DeepPink', 'DeepSkyBlue', 'DodgerBlue', 'FireBrick', 'FloralWhite',
-    'ForestGreen', 'Fuchsia', 'Gainsboro', 'GhostWhite', 'Gold', 'GoldenRod',
-    'Salmon', 'Tan', 'HoneyDew', 'HotPink', 'IndianRed', 'Ivory', 'Khaki',
-    'Lavender', 'LavenderBlush', 'LawnGreen', 'LemonChiffon', 'LightBlue',
-    'LightCoral', 'LightCyan', 'LightGoldenRodYellow', 'LightGray', 'LightGrey',
-    'LightGreen', 'LightPink', 'LightSalmon', 'LightSeaGreen', 'LightSkyBlue',
-    'LightSlateGray', 'LightSlateGrey', 'LightSteelBlue', 'LightYellow', 'Lime',
-    'LimeGreen', 'Linen', 'Magenta', 'MediumAquaMarine', 'MediumOrchid',
-    'MediumPurple', 'MediumSeaGreen', 'MediumSlateBlue', 'MediumSpringGreen',
-    'MediumTurquoise', 'MediumVioletRed', 'MintCream', 'MistyRose', 'Moccasin',
-    'NavajoWhite', 'OldLace', 'Olive', 'OliveDrab', 'Orange', 'OrangeRed',
-    'Orchid', 'PaleGoldenRod', 'PaleGreen', 'PaleTurquoise', 'PaleVioletRed',
-    'PapayaWhip', 'PeachPuff', 'Peru', 'Pink', 'Plum', 'PowderBlue', 'Purple',
-    'Red', 'RosyBrown', 'RoyalBlue', 'SaddleBrown', 'Green', 'SandyBrown',
-    'SeaGreen', 'SeaShell', 'Sienna', 'Silver', 'SkyBlue', 'SlateBlue',
-    'SlateGray', 'SlateGrey', 'Snow', 'SpringGreen', 'SteelBlue', 'GreenYellow',
-    'Teal', 'Thistle', 'Tomato', 'Turquoise', 'Violet', 'Wheat', 'White',
-    'WhiteSmoke', 'Yellow', 'YellowGreen'
-]
-
-
 detection_graph = tf.Graph()
 with detection_graph.as_default():
     od_graph_def = tf.GraphDef()
@@ -73,12 +45,6 @@ def load_image_into_numpy_array(image, h, w):
         (im_height, im_width, 3)).astype(np.uint8)
 
 # Detection code
-# For range has to be set by number of images appeared in testing graph.
-PATH_TO_TEST_IMAGES_DIR = 'test'
-TEST_IMAGE_PATHS = [ os.path.join(PATH_TO_TEST_IMAGES_DIR, 'st{}.jpg'.format(i)) for i in range(1, 7) ]
-
-# Size, in inches, of the output images.
-IMAGE_SIZE = (12, 8)
 
 label_map = label_map_util.load_labelmap(PATH_TO_LABELS)
 categories = label_map_util.convert_label_map_to_categories(label_map, max_num_classes=NUM_CLASSES, use_display_name=True)
@@ -105,21 +71,15 @@ def detection_code(video_inp):
     nb_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))    
     frame_h = int(video_reader.get(cv2.CAP_PROP_FRAME_HEIGHT))
     frame_w = int(video_reader.get(cv2.CAP_PROP_FRAME_WIDTH))
-    # frame_h = 320
-    # frame_w = 240
-    # Set sizis manually
-    #out_h = 600
-    #out_w = 717
-    print(frame_h)
-    print(frame_w)
+   
     video_writer = cv2.VideoWriter(video_out,
                                 cv2.VideoWriter_fourcc(*'mp4v'), 
-                                28.0, 
+                                23.0, 
                                 (frame_w, frame_h))
     
     video_writer_original = cv2.VideoWriter(video_original,
                                 cv2.VideoWriter_fourcc(*'mp4v'), 
-                                28.0, 
+                                23.0, 
                                 (frame_w, frame_h))
 
 
@@ -135,13 +95,16 @@ def detection_code(video_inp):
             detection_classes = detection_graph.get_tensor_by_name('detection_classes:0')
             num_detections = detection_graph.get_tensor_by_name('num_detections:0')
             skip_frame = 1
-            skipt_each_n = 6
+            skipt_each_n = 4
+
+            nb_count = 0
+            prev_count = -1
             for i in tqdm(range(int(nb_frames/skipt_each_n)-1)):
-                ret, frame = video_reader.read()        
+                _, frame = video_reader.read()        
                 if skip_frame == skipt_each_n:
                     skip_frame = 1
                     for i in range(1, skipt_each_n-1):
-                        ret, frame = video_reader.read()                                       
+                        _, frame = video_reader.read()                                       
                     #ret, frame = video_reader.read()                                       
                 skip_frame = skip_frame + 1
                 original_frame = frame
@@ -150,7 +113,7 @@ def detection_code(video_inp):
                 image_np = load_image_into_numpy_array(frame, frame_h, frame_w)
                 image_np_original = load_image_into_numpy_array(original_frame, frame_h, frame_w)
                 # Expand dimensions since the model expects images to have shape: [1, None, None, 3]
-                image_np = cv2.resize(image_np, (frame_w, frame_h), interpolation = cv2.INTER_AREA)
+                #image_np = cv2.resize(image_np, (frame_w, frame_h), interpolation = cv2.INTER_AREA)
                 # original_image = image_np
 
                 image_np_expanded = np.expand_dims(image_np, axis=0)
@@ -170,7 +133,7 @@ def detection_code(video_inp):
                     np.squeeze(scores),
                     category_index,
                     use_normalized_coordinates=True,
-                    min_score_thresh=.95,
+                    min_score_thresh=.94,
                     groundtruth_box_visualization_color='black',
                     line_thickness=3)
                 
@@ -178,29 +141,30 @@ def detection_code(video_inp):
                 video_writer_original.write(np.uint8(image_np_original))
                 # Detecting sizes                
                 # Getting information: Practicing
-                box_to_color_map = collections.defaultdict(str)
-                nb_count = 0
+                box_to_color_map = collections.defaultdict(str)                
                 boxes = np.squeeze(boxes)
                 scores = np.squeeze(scores)
                 classes = np.squeeze(classes).astype(np.int32)
+                
+                # Store label
+                class_names = []
+                widths = []
                 for i in range(min(20, boxes.shape[0])):
-                    if scores is None or scores[i] > 0.94:                        
-                        nb_count = nb_count+1
-                for i in range(min(20, boxes.shape[0])):
-                    if scores is None or scores[i] > 0.94:
+                    if scores is None or scores[i] > 0.94:     
+                        nb_count = nb_count+1                
                         box = tuple(boxes[i].tolist())
-                        box_to_color_map[box] = 'black'
-                        box_to_color_map[box] = STANDARD_COLORS[
-                            classes[i] % len(STANDARD_COLORS)]
-                        ymin, xmin, ymax, xmax = box
+                        _, xmin, _, xmax = box
                         # Multiple with image height and width
-                        class_name = category_index[classes[i]]['id']
-                        width_px = xmax*frame_w-xmin*frame_w
-                        animal_size_determination.animal_get_size(width_px, class_name, nb_frames, nb_count)
-            
-            print('Video released')
-            print(int(video_writer.get(cv2.CAP_PROP_FRAME_HEIGHT)))
-            print(int(video_writer.get(cv2.CAP_PROP_FRAME_WIDTH)))
+                        class_names.append(category_index[classes[i]]['id'])
+                        widths.append(xmax*frame_w-xmin*frame_w)
+
+                
+                animal_size_determination.animal_get_size_array(widths, class_names, nb_frames, nb_count, prev_count)
+                if prev_count < nb_count:
+                    prev_count = nb_count
+                nb_count = 0
+
+            print('Video released')            
             video_reader.release()
             video_writer.release()
             video_writer_original.release()
