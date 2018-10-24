@@ -1,12 +1,10 @@
-![example detection](https://github.com/jaspereb/FasterRCNNTutorial/blob/master/1.jpg)
+
 
 # Faster-RCNN using Inception model (equivalent to Xception)
 Code build on top of following examples:
 https://github.com/jaspereb/FasterRCNNTutorial/
 Model/research link
 
-# KAIN!!
-Please move to section below which say "Please move here" and start execuring commands in tensorflow
 
 ## Prereqs
 You must have:
