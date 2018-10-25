@@ -1,5 +1,5 @@
 # Project was created based on EGH455 assignment QUT
-
+# BE AWARE that repository still in development. Some reference links and contributers may still missing.
 This Assignment contain semester project assignment for QUT University EGH455-2018sem2. Submission date and presentation set on *Friday, October 19 2018*. Task was completed in gropu.
 
 This solution performed in a docker container using tensorflow with CPU-only usage build on Python3. In addition, it includes support of NVIDEA player with jupyter notebook to run test codes.
